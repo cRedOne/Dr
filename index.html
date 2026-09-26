@@ -802,7 +802,7 @@
       }
     }
 
-    let timerStartTime = new Date().getTime() - (18 * 365.25 * 24 * 60 * 60 * 1000);
+    let timerStartTime = new Date('2018-09-28T00:00:00').getTime();
     function updateTimer() {
       const now = new Date().getTime();
       const diff = now - timerStartTime;
