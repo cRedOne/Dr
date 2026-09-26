@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>С Днём Рождения, Соня!</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 0;
+      background: radial-gradient(circle at 50% 50%, #4a148c 0%, #1a0033 70%, #0a0015 100%);
+      position: relative;
+    }
+
+    .tilt-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .star {
+      position: absolute;
+      width: 0px; height: 0px;
+      border-right: 10px solid transparent;
+      border-bottom: 7px solid #ffe600;
+      border-left: 10px solid transparent;
+      transform: rotate(35deg);
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px #ffe600);
+      animation: floatStar 3.5s infinite ease-in-out;
+      opacity: 0.85;
+      z-index: 2;
+    }
+    .star:before {
+      border-bottom: 8px solid #ffe600;
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+      position: absolute;
+      height: 0; width: 0;
+      top: -5px; left: -6px;
+      content: '';
+      transform: rotate(-35deg);
+    }
+    .star:after {
+      position: absolute;
+      display: block;
+      color: #ffe600;
+      top: 0px; left: -10.5px;
+      width: 0px; height: 0px;
+      border-right: 10px solid transparent;
+      border-bottom: 7px solid #ffe600;
+      border-left: 10px solid transparent;
+      transform: rotate(-70deg);
+      content: '';
+    }
+
+    .st1  { top: 5%;  left: 10%; animation-duration: 3.0s; }
+    .st2  { top: 8%;  left: 80%; animation-duration: 4.2s; animation-delay: 0.5s; }
+    .st3  { top: 18%; left: 45%; animation-duration: 3.5s; animation-delay: 1.2s; }
+    .st4  { top: 22%; left: 88%; animation-duration: 2.8s; animation-delay: 0.2s; }
+    .st5  { top: 28%; left: 12%; animation-duration: 4.0s; animation-delay: 1.5s; }
+    .st6  { top: 38%; left: 75%; animation-duration: 3.2s; animation-delay: 0.8s; }
+    .st7  { top: 42%; left: 20%; animation-duration: 4.5s; animation-delay: 0.3s; }
+    .st8  { top: 50%; left: 85%; animation-duration: 3.1s; animation-delay: 1.1s; }
+    .st9  { top: 55%; left: 8%;  animation-duration: 3.7s; animation-delay: 0.7s; }
+    .st10 { top: 62%; left: 68%; animation-duration: 2.9s; animation-delay: 1.4s; }
+    .st11 { top: 70%; left: 25%; animation-duration: 4.1s; animation-delay: 0.4s; }
+    .st12 { top: 75%; left: 82%; animation-duration: 3.4s; animation-delay: 1.0s; }
+    .st13 { top: 82%; left: 15%; animation-duration: 3.8s; animation-delay: 0.6s; }
+    .st14 { top: 88%; left: 55%; animation-duration: 4.3s; animation-delay: 0.9s; }
+    .st15 { top: 92%; left: 90%; animation-duration: 3.2s; animation-delay: 1.3s; }
+
+    @keyframes floatStar {
+      0%   { transform: translateY(0) rotate(0deg) scale(0.7); opacity: 0.3; }
+      50%  { transform: translateY(-18px) rotate(180deg) scale(1.3); opacity: 1; }
+      100% { transform: translateY(0) rotate(360deg) scale(0.7); opacity: 0.3; }
+    }
+
+    .trail-star {
+      position: fixed;
+      pointer-events: none;
+      font-size: 18px;
+      z-index: 999;
+      animation: fadeTrail 0.8s linear forwards;
+    }
+    @keyframes fadeTrail {
+      0% { opacity: 1; transform: scale(1.3) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0.2) translateY(-25px) rotate(180deg); }
+    }
+
+    .burst-emoji {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      font-size: 32px;
+      animation: burstAnim 2.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+    @keyframes burstAnim {
+      0% { opacity: 1; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+      80% { opacity: 0.9; }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.8) rotate(360deg); }
+    }
+
+    .lights-bar {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 440px;
+      padding: 12px 0;
+      z-index: 100;
+    }
+    .lights-bar.top { position: fixed; top: 0; }
+    .lights-bar.bottom { position: fixed; bottom: 0; }
+
+    .bulb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      animation: brightGlow 0.9s infinite alternate ease-in-out;
+    }
+    .bulb:nth-child(1) { animation-delay: 0.0s; background: #ff2a6d; color: #ff2a6d; }
+    .bulb:nth-child(2) { animation-delay: 0.15s; background: #ffb703; color: #ffb703; }
+    .bulb:nth-child(3) { animation-delay: 0.3s; background: #05ffa1; color: #05ffa1; }
+    .bulb:nth-child(4) { animation-delay: 0.45s; background: #00f0ff; color: #00f0ff; }
+    .bulb:nth-child(5) { animation-delay: 0.6s; background: #e0aaff; color: #e0aaff; }
+    .bulb:nth-child(6) { animation-delay: 0.75s; background: #ff0055; color: #ff0055; }
+
+    @keyframes brightGlow {
+      0% { opacity: 0.3; transform: scale(0.8); box-shadow: 0 0 4px currentColor; }
+      100% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 0 0 70px currentColor; }
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 15px;
+      z-index: 10;
+      margin: auto 0;
+      padding: 50px 0;
+    }
+
+    .cubes-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+    .line {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      width: 100%;
+    }
+    
+    .cube-wrapper {
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .cube {
+      width: clamp(34px, 10vw, 46px);
+      height: clamp(34px, 10vw, 46px);
+      color: white;
+      font-weight: 900;
+      font-size: clamp(17px, 5vw, 24px);
+      letter-spacing: -0.5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.7);
+      cursor: pointer;
+      user-select: none;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+      animation: animeCube 1.6s infinite alternate ease-in-out;
+      transition: transform 0.15s ease;
+    }
+
+    .cube:active {
+      transform: scale(0.82) !important;
+    }
+
+    .c1 { background: linear-gradient(135deg, #ff007f, #ff758c); animation-delay: 0.0s; }
+    .c2 { background: linear-gradient(135deg, #00f0ff, #0072ff); animation-delay: 0.2s; }
+    .c3 { background: linear-gradient(135deg, #ffe600, #ff5e00); animation-delay: 0.4s; }
+    .c4 { background: linear-gradient(135deg, #05ffa1, #00b894); animation-delay: 0.6s; }
+    .c5 { background: linear-gradient(135deg, #ae00ff, #7b2cbf); animation-delay: 0.8s; }
+
+    @keyframes animeCube {
+      0% { filter: hue-rotate(0deg); transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(3deg) scale(1.05); }
+      100% { filter: hue-rotate(180deg); transform: translateY(0) rotate(-3deg); }
+    }
+
+    .swipe-hint {
+      color: rgba(255,255,255,0.85);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: -4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: pulseHint 1.5s infinite alternate;
+    }
+    @keyframes pulseHint {
+      0% { opacity: 0.5; transform: translateY(0); }
+      100% { opacity: 1; transform: translateY(-3px); }
+    }
+
+    .messages-container {
+      width: 90%;
+      max-width: 340px;
+      height: 60px;
+      position: relative;
+    }
+    .sms-card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 18px;
+      padding: 8px 14px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sms-card.active { opacity: 1; transform: translateY(0) scale(1); }
+    .sms-avatar {
+      font-size: 22px;
+      background: rgba(255,255,255,0.25);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .sms-text {
+      font-size: 13.5px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .music-btn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1.5px solid rgba(255,255,255,0.5);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(255,255,255,0.3);
+      transition: transform 0.2s;
+    }
+    .music-btn:active { transform: scale(0.9); }
+    .music-btn svg { width: 22px; height: 22px; fill: white; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+    /* Модальные окна */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(10, 0, 25, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 26px;
+      padding: 26px 20px;
+      width: 90%;
+      max-width: 330px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      transform: scale(0.8);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+    .modal-overlay.active .modal-box {
+      transform: scale(1);
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      z-index: 10;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: background 0.2s;
+    }
+    .modal-close:active { background: rgba(255,255,255,0.3); }
+    .modal-close svg { width: 16px; height: 16px; fill: currentColor; }
+    
+    .modal-title {
+      color: #fff;
+      font-size: 19px;
+      font-weight: 800;
+      text-align: center;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      padding-right: 32px;
+      padding-left: 8px;
+      width: 100%;
+      letter-spacing: -0.3px;
+    }
+
+    /* Графика торта и свечи */
+    .cake-graphic {
+      width: 120px;
+      height: 100px;
+      position: relative;
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .cake-body {
+      width: 110px;
+      height: 55px;
+      background: linear-gradient(180deg, #ff758c 0%, #ff007f 100%);
+      border-radius: 12px 12px 18px 18px;
+      position: absolute;
+      bottom: 0;
+      box-shadow: inset 0 4px 6px rgba(255,255,255,0.6), 0 8px 15px rgba(0,0,0,0.5);
+    }
+    .cake-body:before {
+      content: '';
+      position: absolute;
+      top: -10px; left: 0;
+      width: 100%; height: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+    }
+    .candle {
+      width: 10px;
+      height: 32px;
+      background: repeating-linear-gradient(45deg, #ffe600, #ffe600 5px, #ff5e00 5px, #ff5e00 10px);
+      position: absolute;
+      top: 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .flame {
+      width: 14px;
+      height: 20px;
+      background: radial-gradient(circle, #fff 20%, #ffbe0b 60%, #ff0055 100%);
+      border-radius: 50% 50% 20% 20%;
+      position: absolute;
+      top: -20px;
+      left: -2px;
+      animation: flameFlicker 0.6s infinite alternate ease-in-out;
+      box-shadow: 0 0 15px #ffbe0b, 0 0 25px #ff0055;
+      transition: opacity 0.3s ease;
+    }
+    .flame.blown-out { opacity: 0 !important; }
+    @keyframes flameFlicker {
+      0% { transform: scale(0.9) rotate(-3deg); }
+      100% { transform: scale(1.1) rotate(3deg); }
+    }
+
+    .wow-trigger-btn {
+      background: linear-gradient(135deg, #ff007f, #ffe600);
+      border: none;
+      color: #000;
+      font-weight: 900;
+      font-size: 16px;
+      padding: 15px 25px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #ff007f;
+      animation: pulseWow 1.2s infinite alternate;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    @keyframes pulseWow {
+      0% { transform: scale(0.95); box-shadow: 0 0 10px #ff007f; }
+      100% { transform: scale(1.05); box-shadow: 0 0 30px #ffe600; }
+    }
+
+    .timer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .timer-block {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+    }
+    .timer-num {
+      font-size: 24px;
+      font-weight: 900;
+      color: #00f0ff;
+      text-shadow: 0 0 12px rgba(0,240,255,0.8);
+      letter-spacing: -0.5px;
+    }
+    .timer-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ddd;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #00f0ff, #0072ff);
+      border: none;
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 12px 22px;
+      border-radius: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,240,255,0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Фотография в модалке */
+    .photo-frame {
+      width: 100%;
+      max-height: 260px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+</head>
+<body onclick="handleGlobalClick()">
+
+  <!-- Фоновая музыка MP3 -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="deti-online.com_-_rom-bim-bom.mp3" type="audio/mpeg">
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Кнопка музыки со стильной SVG иконкой -->
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic(event)">
+    <svg id="musicIcon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+  </button>
+
+  <div class="tilt-wrapper">
+
+    <div class="star st1"></div><div class="star st2"></div><div class="star st3"></div>
+    <div class="star st4"></div><div class="star st5"></div><div class="star st6"></div>
+    <div class="star st7"></div><div class="star st8"></div><div class="star st9"></div>
+    <div class="star st10"></div><div class="star st11"></div><div class="star st12"></div>
+    <div class="star st13"></div><div class="star st14"></div><div class="star st15"></div>
+
+    <div class="lights-bar top">
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+    </div>
+
+    <div class="main-content">
+      <div class="swipe-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Свайпни буквы в сторону
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </div>
+      
+      <div class="cubes-container">
+        <div class="line">
+          <div class="cube-wrapper"><div class="cube c1" onclick="handleCubeTap(event, 'cake')">С</div></div>
+          <div class="cube-wrapper"><div class="cube c2" onclick="handleCubeTap(event, 'photo')">О</div></div>
+          <div class="cube-wrapper"><div class="cube c3" onclick="handleCubeTap(event, 'wow')">Н</div></div>
+          <div class="cube-wrapper"><div class="cube c4" onclick="handleCubeTap(event, 'timer')">Я</div></div>
+        </div>
+        <div class="line">
+          <div class="cube-wrapper"><div class="cube c5" onclick="handleCubeTap(event, null)">С</div></div>
+        </div>
+        <div class="line">
+          <div class="cube-wrapper"><div class="cube c1" onclick="handleCubeTap(event, null)">Д</div></div>
+          <div class="cube-wrapper"><div class="cube c2" onclick="handleCubeTap(event, null)">Н</div></div>
+          <div class="cube-wrapper"><div class="cube c3" onclick="handleCubeTap(event, null)">Ё</div></div>
+          <div class="cube-wrapper"><div class="cube c4" onclick="handleCubeTap(event, null)">М</div></div>
+        </div>
+        <div class="line">
+          <div class="cube-wrapper"><div class="cube c5" onclick="handleCubeTap(event, null)">Р</div></div>
+          <div class="cube-wrapper"><div class="cube c1" onclick="handleCubeTap(event, null)">О</div></div>
+          <div class="cube-wrapper"><div class="cube c2" onclick="handleCubeTap(event, null)">Ж</div></div>
+          <div class="cube-wrapper"><div class="cube c3" onclick="handleCubeTap(event, null)">Д</div></div>
+          <div class="cube-wrapper"><div class="cube c4" onclick="handleCubeTap(event, null)">Е</div></div>
+          <div class="cube-wrapper"><div class="cube c5" onclick="handleCubeTap(event, null)">Н</div></div>
+          <div class="cube-wrapper"><div class="cube c1" onclick="handleCubeTap(event, null)">И</div></div>
+          <div class="cube-wrapper"><div class="cube c2" onclick="handleCubeTap(event, null)">Я</div></div>
+        </div>
+      </div>
+
+      <div class="messages-container">
+        <div class="sms-card active" id="sms">
+          <div class="sms-avatar" id="sms-avatar">🎉</div>
+          <div class="sms-text" id="sms-text">Сонечка, сияй ярче всех сегодня! ✨</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lights-bar bottom">
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+    </div>
+
+  </div>
+
+  <!-- Модалка Торт -->
+  <div class="modal-overlay" id="cakeModal">
+    <div class="modal-box">
+      <div class="modal-close" onclick="closeModal('cakeModal')">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </div>
+      <div class="modal-title" id="cakeModalTitle">Загадай желание и задуй свечу! 🎂</div>
+      
+      <div class="cake-graphic">
+        <div class="candle" onclick="blowOutCandle()">
+          <div class="flame" id="candleFlame"></div>
+        </div>
+        <div class="cake-body"></div>
+      </div>
+
+      <button class="action-btn" onclick="blowOutCandle()">Задуть свечу 💨</button>
+    </div>
+  </div>
+
+  <!-- Модалка Фото -->
+  <div class="modal-overlay" id="photoModal">
+    <div class="modal-box">
+      <div class="modal-close" onclick="closeModal('photoModal')">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </div>
+      <div class="modal-title">Самая прекрасная! ✨</div>
+      <div class="photo-frame">
+        <img src="foto.jpg" alt="Соня" onerror="this.src='https://via.placeholder.com/300x250/ff007f/ffffff?text=foto.jpg'">
+      </div>
+      <p style="color: #fff; font-size: 13.5px; text-align: center; font-weight: 700;">Улыбайся каждый день! 😊</p>
+    </div>
+  </div>
+
+  <!-- Модалка Вау-взрыв -->
+  <div class="modal-overlay" id="wowModal">
+    <div class="modal-box">
+      <div class="modal-close" onclick="closeModal('wowModal')">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </div>
+      <div class="modal-title">Готова к взрыву эмоций? 🚀</div>
+      <p style="color: #ddd; font-size: 13px; text-align: center; font-weight: 500;">Нажми на яркую кнопку ниже!</p>
+      <button class="wow-trigger-btn" onclick="triggerWowStorm()">НАЖМИ МЕНЯ! 💥</button>
+    </div>
+  </div>
+
+  <!-- Модалка Таймер -->
+  <div class="modal-overlay" id="timerModal">
+    <div class="modal-box">
+      <div class="modal-close" onclick="closeModal('timerModal')">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </div>
+      <div class="modal-title">Соня украшает этот мир уже: 💖</div>
+      
+      <div class="timer-grid">
+        <div class="timer-block">
+          <div class="timer-num" id="t-days">0</div>
+          <div class="timer-label">Дней</div>
+        </div>
+        <div class="timer-block">
+          <div class="timer-num" id="t-hours">0</div>
+          <div class="timer-label">Часов</div>
+        </div>
+        <div class="timer-block">
+          <div class="timer-num" id="t-mins">0</div>
+          <div class="timer-label">Минут</div>
+        </div>
+        <div class="timer-block">
+          <div class="timer-num" id="t-secs">0</div>
+          <div class="timer-label">Секунд</div>
+        </div>
+      </div>
+      <p style="color: #00f0ff; font-size: 12px; margin-top: 5px; font-weight: 700; text-align: center;">...и с каждой секундой всё сильнее! ✨</p>
+    </div>
+  </div>
+
+  <script>
+    const messages = [
+      { avatar: '🎉', text: 'Сонечка, сияй ярче всех сегодня! ✨' },
+      { avatar: '🎁', text: 'Самых невероятных и крутых приключений!' },
+      { avatar: '🌸', text: 'Будь всегда самой счастливой и любимой! ❤️' },
+      { avatar: '🎈', text: 'Гору подарков, сладостей и улыбок! 🍰' },
+      { avatar: '⭐', text: 'Пусть исполняются абсолютно все мечты!' }
+    ];
+
+    let currentIndex = 0;
+    function rotateMessages() {
+      const card = document.getElementById('sms');
+      card.classList.remove('active');
+
+      setTimeout(() => {
+        currentIndex = (currentIndex + 1) % messages.length;
+        const msg = messages[currentIndex];
+        
+        document.getElementById('sms-avatar').innerText = msg.avatar;
+        document.getElementById('sms-text').innerText = msg.text;
+
+        card.classList.add('active');
+      }, 400);
+    }
+    setInterval(rotateMessages, 2800);
+
+    function handleCubeTap(e, feature) {
+      e.stopPropagation();
+      playMusicOnUserAction();
+
+      // Мощный взрыв конфетти при клике на кубик (больше частиц!)
+      if (typeof confetti === 'function') {
+        const rect = e.target.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+        confetti({ 
+          particleCount: 90, 
+          spread: 80, 
+          startVelocity: 35,
+          scalar: 1.1,
+          origin: { x: x, y: y } 
+        });
+      }
+
+      if (feature === 'cake') {
+        setTimeout(() => openModal('cakeModal'), 250);
+      } else if (feature === 'photo') {
+        setTimeout(() => openModal('photoModal'), 250);
+      } else if (feature === 'wow') {
+        setTimeout(() => openModal('wowModal'), 250);
+      } else if (feature === 'timer') {
+        setTimeout(() => {
+          openModal('timerModal');
+          updateTimer();
+        }, 250);
+      }
+    }
+
+    function openModal(id) { 
+      if (id === 'cakeModal') {
+        resetCandle();
+      }
+      document.getElementById(id).classList.add('active'); 
+    }
+
+    function closeModal(id) { 
+      document.getElementById(id).classList.remove('active'); 
+      if (id === 'cakeModal') {
+        resetCandle();
+      }
+    }
+
+    function resetCandle() {
+      const flame = document.getElementById('candleFlame');
+      flame.classList.remove('blown-out');
+      document.getElementById('cakeModalTitle').innerText = 'Загадай желание и задуй свечу! 🎂';
+    }
+
+    // Задувание свечки с пышным салютом
+    function blowOutCandle() {
+      const flame = document.getElementById('candleFlame');
+      if (!flame.classList.contains('blown-out')) {
+        flame.classList.add('blown-out');
+        document.getElementById('cakeModalTitle').innerText = 'Пусть все желания исполнятся! ✨';
+
+        if (typeof confetti === 'function') {
+          // Салют из конфетти высокой плотности
+          confetti({ particleCount: 180, spread: 100, startVelocity: 45, origin: { y: 0.6 }, colors: ['#ffe600', '#ff0055', '#00f0ff', '#ffffff'] });
+          setTimeout(() => {
+            confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0 } });
+            confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1 } });
+          }, 200);
+        }
+      }
+    }
+
+    // Замедленный полет смайлов + Мега-Хлопушка из конфетти
+    function triggerWowStorm() {
+      closeModal('wowModal');
+      const emojis = ['👑', '💎', '🌸', '🎁', '❤️', '🎂', '🎉', '✨', '🎈', '⭐', '💖'];
+      
+      for (let i = 0; i < 45; i++) {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = 'burst-emoji';
+          el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+          
+          const startX = window.innerWidth / 2;
+          const startY = window.innerHeight / 2;
+          
+          el.style.left = startX + 'px';
+          el.style.top = startY + 'px';
+
+          const tx = (Math.random() - 0.5) * (window.innerWidth * 0.95);
+          const ty = (Math.random() - 0.5) * (window.innerHeight * 0.95);
+
+          el.style.setProperty('--tx', `${tx}px`);
+          el.style.setProperty('--ty', `${ty}px`);
+
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 2400);
+        }, i * 35);
+      }
+
+      // Множественные залпы хлопушки
+      if (typeof confetti === 'function') {
+        const count = 400;
+        const defaults = { origin: { y: 0.7 } };
+
+        function fire(particleRatio, opts) {
+          confetti(Object.assign({}, defaults, opts, {
+            particleCount: Math.floor(count * particleRatio)
+          }));
+        }
+
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+      }
+    }
+
+    let timerStartTime = new Date().getTime() - (18 * 365.25 * 24 * 60 * 60 * 1000);
+    function updateTimer() {
+      const now = new Date().getTime();
+      const diff = now - timerStartTime;
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('t-days').innerText = days;
+      document.getElementById('t-hours').innerText = hours;
+      document.getElementById('t-mins').innerText = mins;
+      document.getElementById('t-secs').innerText = secs;
+    }
+    setInterval(updateTimer, 1000);
+
+    const wrappers = document.querySelectorAll('.cube-wrapper');
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isExploded = false;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      spawnTrailStar(touchStartX, touchStartY);
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      const x = e.touches[0].clientX;
+      const y = e.touches[0].clientY;
+      spawnTrailStar(x, y);
+
+      const diffX = x - touchStartX;
+      const diffY = y - touchStartY;
+
+      if (Math.abs(diffX) > 40 || Math.abs(diffY) > 40) {
+        if (!isExploded) {
+          explodeCubesInBounds();
+        }
+      }
+    });
+
+    function spawnTrailStar(x, y) {
+      const star = document.createElement('div');
+      star.className = 'trail-star';
+      star.innerText = '✨';
+      star.style.left = x + 'px';
+      star.style.top = y + 'px';
+      document.body.appendChild(star);
+      setTimeout(() => star.remove(), 800);
+    }
+
+    function explodeCubesInBounds() {
+      isExploded = true;
+      playMusicOnUserAction();
+
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+
+      wrappers.forEach((wrap) => {
+        const maxOffsetX = Math.min(screenW * 0.35, 140);
+        const maxOffsetY = Math.min(screenH * 0.30, 150);
+
+        const randomX = (Math.random() - 0.5) * (maxOffsetX * 2);
+        const randomY = (Math.random() - 0.5) * (maxOffsetY * 2);
+        const randomRot = (Math.random() - 0.5) * 540;
+
+        wrap.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRot}deg) scale(0.85)`;
+      });
+
+      // Хлопушка при разлёте кубиков
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 140, spread: 100, origin: { y: 0.5 }, startVelocity: 35 });
+      }
+
+      setTimeout(() => {
+        wrappers.forEach((wrap) => {
+          wrap.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
+        });
+        setTimeout(() => { isExploded = false; }, 800);
+      }, 1800);
+    }
+
+    function handleGlobalClick() {
+      playMusicOnUserAction();
+    }
+
+    const audio = document.getElementById('bgMusic');
+    const musicBtn = document.getElementById('musicBtn');
+    const musicIcon = document.getElementById('musicIcon');
+
+    const iconPlay = '<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>';
+    const iconMute = '<path d="M4.27 3L3 4.27l9 9v.28c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 3.04 0 3.83-2.26l4.4 4.4L19.73 21 4.27 3zM14 7h4V3h-6v5.18l2 2V7z"/>';
+
+    function playMusicOnUserAction() {
+      if (audio.paused) {
+        audio.play().then(() => {
+          musicIcon.innerHTML = iconPlay;
+        }).catch(() => {});
+      }
+    }
+
+    function toggleMusic(e) {
+      e.stopPropagation();
+      if (audio.paused) {
+        audio.play();
+        musicIcon.innerHTML = iconPlay;
+      } else {
+        audio.pause();
+        musicIcon.innerHTML = iconMute;
+      }
+    }
+  </script>
+</body>
+</html>
